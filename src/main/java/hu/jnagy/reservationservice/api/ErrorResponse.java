@@ -1,4 +1,4 @@
-package hu.jnagy.reservationservice.responsetype;
+package hu.jnagy.reservationservice.api;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.Objects;

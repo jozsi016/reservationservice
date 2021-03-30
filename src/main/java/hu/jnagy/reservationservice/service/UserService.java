@@ -1,7 +1,8 @@
 package hu.jnagy.reservationservice.service;
 
-import hu.jnagy.reservationservice.api.UserServiceResponse;
-import hu.jnagy.reservationservice.model.User;
+import hu.jnagy.reservationservice.api.userservice.ApiUser;
+import hu.jnagy.reservationservice.api.userservice.UserServiceResponse;
+import hu.jnagy.reservationservice.configuration.ReservationConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -10,14 +11,17 @@ import org.springframework.web.client.RestTemplate;
 public class UserService {
 
     private RestTemplate restTemplate;
-    private String userServiceURL = "http://localhost:8081/user/{userId}";
+    private ReservationConfiguration configuration;
+    private String userServiceURL;
 
-    public UserService(RestTemplate restTemplate) {
+    public UserService(RestTemplate restTemplate, ReservationConfiguration configuration) {
         this.restTemplate = restTemplate;
+        this.configuration = configuration;
+        this.userServiceURL =  configuration.getUserServiceURL();
     }
 
-    public User getUserById(long userId) {
-        ResponseEntity<UserServiceResponse> usersServiceResponse = restTemplate.getForEntity(userServiceURL, UserServiceResponse.class);
+    public ApiUser getUserById(long userId) {
+        ResponseEntity<UserServiceResponse> usersServiceResponse = restTemplate.getForEntity(userServiceURL+"/" +userId, UserServiceResponse.class);
         return usersServiceResponse.getBody().getUser();
     }
 }

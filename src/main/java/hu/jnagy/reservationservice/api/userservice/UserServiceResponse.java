@@ -1,19 +1,18 @@
-package hu.jnagy.reservationservice.api;
+package hu.jnagy.reservationservice.api.userservice;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import hu.jnagy.reservationservice.model.User;
 
 import java.util.Objects;
 
 @JsonDeserialize(builder = UserServiceResponse.Builder.class)
 public final class UserServiceResponse {
-    private final User user;
+    private final ApiUser user;
 
     private UserServiceResponse(UserServiceResponse.Builder builder) {
         this.user = builder.user;
     }
 
-    public User getUser() {
+    public ApiUser getUser() {
         return user;
     }
 
@@ -38,9 +37,9 @@ public final class UserServiceResponse {
     }
 
     public static class Builder {
-        private User user;
+        private ApiUser user;
 
-        public Builder withUser(User user) {
+        public Builder withUser(ApiUser user) {
             this.user = user;
             return this;
         }

@@ -1,6 +1,7 @@
-package hu.jnagy.reservationservice.responsetype;
+package hu.jnagy.reservationservice.api;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import hu.jnagy.reservationservice.model.Reservation;
 
 import java.util.Objects;
@@ -10,7 +11,7 @@ public final class ReservationResponse {
     private final Reservation reservation;
 
     private ReservationResponse(ReservationResponse.Builder builder) {
-        this.reservation =  builder.reservation;
+        this.reservation = builder.reservation;
     }
 
     public Reservation getReservation() {
@@ -37,6 +38,7 @@ public final class ReservationResponse {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static class Builder {
         private Reservation reservation;
 
@@ -46,7 +48,7 @@ public final class ReservationResponse {
         }
 
         public ReservationResponse build() {
-            return  new ReservationResponse(this);
+            return new ReservationResponse(this);
         }
 
     }

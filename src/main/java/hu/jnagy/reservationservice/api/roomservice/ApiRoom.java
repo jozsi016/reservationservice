@@ -1,12 +1,16 @@
-package hu.jnagy.reservationservice.api;
+package hu.jnagy.reservationservice.api.roomservice;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
-public final class Room {
+public final class ApiRoom {
     private final long id;
     private final double unitPrice;
 
-    public Room(long id, double unitPrice) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public ApiRoom(@JsonProperty("id")long id, @JsonProperty("unitPrice")double unitPrice) {
         this.id = id;
         this.unitPrice = unitPrice;
     }
@@ -23,7 +27,7 @@ public final class Room {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Room room = (Room) o;
+        ApiRoom room = (ApiRoom) o;
         return id == room.id;
     }
 

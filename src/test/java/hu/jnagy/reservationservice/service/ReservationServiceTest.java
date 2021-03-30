@@ -21,13 +21,10 @@ public class ReservationServiceTest {
     private UserService userService;
     private ReservationRepository reservationRepository;
 
-    @Autowired
-    private RestTemplate restTemplate;
-
     @Before
     public void setUp() {
         reservationRepository = new ReservationRepository();
-        reservationService = new ReservationService(reservationRepository,restTemplate);
+        reservationService = new ReservationService(reservationRepository,null,null);
     }
 
     @Test
@@ -68,20 +65,20 @@ public class ReservationServiceTest {
     public void shouldFilteredReservationByStartDate() {
         //Given
         User user = new User(1L, "Tom");
-        LocalDate forFilter = LocalDate.now().minusYears(1);
+        LocalDate startDateFilter = LocalDate.now().minusYears(1);
         Room room = new Room(1L, 5000);
         LocalDate start = LocalDate.now().minusDays(5L);
         LocalDate end = LocalDate.now();
         Room room2 = new Room(2L, 5000);
         LocalDate startFuture = LocalDate.now().plusDays(3);
         LocalDate endFuture = LocalDate.now().plusDays(8);
-        Predicate<Reservation> predicateForAge =
-                (r) -> r.getUserId() == user.getId() && r.getStartDate().compareTo(forFilter) >= 0;
+        Predicate<Reservation> filterForStartDate =
+                (r) -> r.getUserId() == user.getId() && r.getStartDate().compareTo(startDateFilter) >= 0;
         reservationService.createReservation(user, room, start, end);
         reservationService.createReservation(user, room2, startFuture, endFuture);
 
         //When
-        List<Reservation> actual = reservationService.getFilteredReservation(predicateForAge);
+        List<Reservation> actual = reservationService.getFilteredReservation(filterForStartDate);
 
         //Then
         assertThat(1L, is(actual.get(0).getRoomId()));

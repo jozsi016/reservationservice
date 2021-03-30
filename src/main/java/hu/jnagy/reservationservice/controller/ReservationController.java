@@ -1,17 +1,24 @@
 package hu.jnagy.reservationservice.controller;
 
+import hu.jnagy.reservationservice.api.ErrorResponse;
+import hu.jnagy.reservationservice.api.userservice.ApiUser;
+import hu.jnagy.reservationservice.api.ApiConverter;
+import hu.jnagy.reservationservice.exception.ResourceNotFoundException;
 import hu.jnagy.reservationservice.model.Reservation;
 import hu.jnagy.reservationservice.model.Room;
 import hu.jnagy.reservationservice.model.User;
-import hu.jnagy.reservationservice.requestobjcet.CreateReservationRequest;
-import hu.jnagy.reservationservice.responsetype.ReservationResponse;
+import hu.jnagy.reservationservice.api.CreateReservationRequest;
+import hu.jnagy.reservationservice.api.ReservationResponse;
 import hu.jnagy.reservationservice.service.ReservationService;
 import hu.jnagy.reservationservice.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -20,21 +27,34 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final UserService userService;
+    private final ApiConverter apiConverter;
 
     public ReservationController(ReservationService reservationService, UserService userService) {
         this.reservationService = reservationService;
         this.userService = userService;
+        this.apiConverter = new ApiConverter();
     }
 
     @PostMapping("/reservation")
-    public void createReservation(CreateReservationRequest createReservationRequest) {
-        LocalDate start = reservationService.getLocalDate(createReservationRequest.getStartStr());
-        LocalDate end = reservationService.getLocalDate(createReservationRequest.getEndStr());
-        User user = userService.getUserById(createReservationRequest.getUserId());
-        List<Room> rooms = reservationService.listOfAvailableRooms(start, end);
-        Optional<Room> room = rooms.stream().filter(r -> createReservationRequest.getRoomId() == r.getId()).findFirst();
-        if (room.isPresent()) {
-            reservationService.createReservation(user, room.get(), start, end);
+    public ReservationResponse createReservation(@RequestBody CreateReservationRequest createReservationRequest) {
+        try {
+            LocalDate start = reservationService.getLocalDate(createReservationRequest.getStartStr());
+            LocalDate end = reservationService.getLocalDate(createReservationRequest.getEndStr());
+            ApiUser apiUser = userService.getUserById(createReservationRequest.getUserId());
+            User user = apiConverter.convertToUser(apiUser);
+            List<Room> rooms = reservationService.listOfAvailableRooms(start, end);
+            Optional<Room> room = rooms.stream().filter(r -> createReservationRequest.getRoomId() == r.getId()).findFirst();
+            Reservation reservation = reservationService.createReservation(user, room.orElseThrow(), start, end);
+            ReservationResponse response = new ReservationResponse.Builder().withReservation(reservation).build();
+            return response;
+        } catch (HttpClientErrorException exc) {
+            if (exc.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new ResourceNotFoundException("The user is not in the system!");
+            } else {
+                throw new ResourceNotFoundException("the room fuck up!");
+            }
+        }catch (NoSuchElementException nsee){
+            throw new ResourceNotFoundException("There is no room in a given number!");
         }
     }
 
@@ -67,4 +87,9 @@ public class ReservationController {
         return reservationService.getFilteredReservation(predicate);
     }
 
+    @ExceptionHandler({ResourceNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleException(ResourceNotFoundException e) {
+        ErrorResponse response = new ErrorResponse.Builder().withCause(e.getMessage()).build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
 }

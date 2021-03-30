@@ -1,19 +1,19 @@
-package hu.jnagy.reservationservice.api;
+package hu.jnagy.reservationservice.api.roomservice;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.List;
 import java.util.Objects;
-import hu.jnagy.reservationservice.model.Room;
+//import hu.jnagy.reservationservice.model.Room;
 
 @JsonDeserialize(builder = RoomServiceResponse.Builder.class)
 public class RoomServiceResponse {
 
-    private final List<Room> rooms;
+    private final List<ApiRoom> rooms;
     private RoomServiceResponse(RoomServiceResponse.Builder builder) {
         this.rooms = builder.rooms;
     }
-    public List<Room> getRooms() {
+    public List<ApiRoom> getRooms() {
         return rooms;
     }
 
@@ -38,9 +38,9 @@ public class RoomServiceResponse {
     }
 
     public static class Builder {
-        private List<Room> rooms;
+        private List<ApiRoom> rooms;
 
-        public Builder withRooms(List<Room> rooms) {
+        public Builder withRooms(List<ApiRoom> rooms) {
             this.rooms = rooms;
             return this;
         }
